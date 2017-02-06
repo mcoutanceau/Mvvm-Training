@@ -86,6 +86,7 @@
   <ItemGroup>
     <Compile Include="Main.cs" />
     <Compile Include="AppDelegate.cs" />
+    <Compile Include="Views\TipView.cs" />
     <Compile Include="Views\TipViewController.cs" />
     <None Include="GettingStarted.Xamarin" />
     <None Include="Info.plist" />

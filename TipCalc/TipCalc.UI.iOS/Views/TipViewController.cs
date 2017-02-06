@@ -1,57 +1,13 @@
-using System;
-using System.Drawing;
-using CoreFoundation;
 using UIKit;
 using Foundation;
 using MvvmCross.iOS.Views;
+using MvvmCross.Binding.BindingContext;
+using TipCalc.Core.ViewModels;
 
 namespace TipCalc.UI.iOS.Views
 {
-    [Register("TipView")]
-    public class TipView : UIView
-    {
-        private UILabel     _subTotalLabel;
-        private UITextField _subTotalText;
-
-        private UILabel     _generosityLabel;
-        private UISlider    _generositySlider;
-
-        private UILabel     _tipLabel;
-
-        public TipView()
-        {
-            Initialize();
-        }
-
-        public TipView(RectangleF bounds) : base(bounds)
-        {
-            Initialize();
-        }
-
-        void Initialize()
-        {
-            this.BackgroundColor = UIColor.Orange;
-
-            _subTotalLabel    = new UILabel()  { Text = "Subtotal", BackgroundColor = UIColor.Yellow };
-            _subTotalText     = new UITextField();
-
-            _generosityLabel  = new UILabel()  { Text = "Generosity" };
-            _generositySlider = new UISlider();
-
-            _tipLabel         = new UILabel();
-
-            const float defaultHeight = 30f;
-
-            this.AddSubviews(_subTotalLabel, _subTotalText, _generosityLabel, _generositySlider, _tipLabel);
-            _subTotalLabel.TranslatesAutoresizingMaskIntoConstraints = false;
-            this.AddConstraint(NSLayoutConstraint.Create(_subTotalLabel, NSLayoutAttribute.Height   , NSLayoutRelation.Equal, 0f, defaultHeight));
-            this.AddConstraint(NSLayoutConstraint.Create(_subTotalLabel, NSLayoutAttribute.CenterX  , NSLayoutRelation.Equal, this, NSLayoutAttribute.CenterX, 1, 0));
-            this.AddConstraint(NSLayoutConstraint.Create(_subTotalLabel, NSLayoutAttribute.Width    , NSLayoutRelation.Equal, this, NSLayoutAttribute.Width  , 1, 0));
-        }
-    }
-
     [Register("TipViewController")]
-    public class TipViewController : MvxViewController<Core.ViewModels.TipViewModel>
+    public partial class TipViewController : MvxViewController<Core.ViewModels.TipViewModel>
     {
         public TipViewController()
         {
@@ -68,16 +24,25 @@ namespace TipCalc.UI.iOS.Views
         public override void ViewDidLoad()
         {
             base.ViewDidLoad();
-            this.View.BackgroundColor = UIColor.Red;
+            this.View.BackgroundColor = UIColor.White;
+            this.TabBarItem.Title = "TipCalc UI iOS";
 
             var tipView = new TipView();
             this.View.AddSubview(tipView);
             tipView.TranslatesAutoresizingMaskIntoConstraints = false;
-            this.View.AddConstraint(NSLayoutConstraint.Create(tipView, NSLayoutAttribute.CenterY, NSLayoutRelation.Equal, this.View, NSLayoutAttribute.CenterY, 1, 0));
-            this.View.AddConstraint(NSLayoutConstraint.Create(tipView, NSLayoutAttribute.CenterX, NSLayoutRelation.Equal, this.View, NSLayoutAttribute.CenterX, 1, 0));
-            this.View.AddConstraint(NSLayoutConstraint.Create(tipView, NSLayoutAttribute.Width  , NSLayoutRelation.Equal, this.View, NSLayoutAttribute.Width  , 1, 0));
-            this.View.AddConstraint(NSLayoutConstraint.Create(tipView, NSLayoutAttribute.Height , NSLayoutRelation.Equal, this.View, NSLayoutAttribute.Width  , 1, 0));
+
+            //TODO: Voir quel est la bonne pratique pour placer la vue correctement et qu'elle ne soit pas ...
+            //... en dessous de la barre de titre.
+            const float _topOffset = 67f;
+            this.View.AddConstraint(NSLayoutConstraint.Create(tipView, NSLayoutAttribute.Top   , NSLayoutRelation.Equal, this.View, NSLayoutAttribute.Top   , 1, _topOffset));
+            this.View.AddConstraint(NSLayoutConstraint.Create(tipView, NSLayoutAttribute.Bottom, NSLayoutRelation.Equal, this.View, NSLayoutAttribute.Bottom, 1, 0));
+            this.View.AddConstraint(NSLayoutConstraint.Create(tipView, NSLayoutAttribute.Width , NSLayoutRelation.Equal, this.View, NSLayoutAttribute.Width , 1, 0));
+            this.View.AddConstraint(NSLayoutConstraint.Create(tipView, NSLayoutAttribute.Height, NSLayoutRelation.Equal, this.View, NSLayoutAttribute.Height, 1, 0));
+
             // Perform any additional setup after loading the view
+            this.CreateBinding(tipView._tipLabel).To<TipViewModel>(vm => vm.Tip).Apply();
+            this.CreateBinding(tipView._subTotalText).To<TipViewModel>(vm => vm.SubTotal).Apply();
+            this.CreateBinding(tipView._generositySlider).To<TipViewModel>(vm => vm.Generosity).Apply();
         }
     }
 }
